@@ -1,0 +1,52 @@
+[
+  {
+    "id": "node_admin_block",
+    "name": "Administrative Block",
+    "category": "building",
+    "block_code": "ADMIN",
+    "floor": "Ground",
+    "latitude": 16.4635,
+    "longitude": 80.5085,
+    "landmarks": ["Main Gate", "Reception", "Registrar Office"]
+  },
+  {
+    "id": "node_academic_block",
+    "name": "Academic Block",
+    "category": "building",
+    "block_code": "ACAD",
+    "floor": "Ground",
+    "latitude": 16.4640,
+    "longitude": 80.5090,
+    "landmarks": ["Central Library", "CSE Labs", "Auditorium"]
+  },
+  {
+    "id": "node_hostel_tower_a",
+    "name": "Hostel Tower A",
+    "category": "hostel",
+    "block_code": "HT-A",
+    "floor": "Ground",
+    "latitude": 16.4650,
+    "longitude": 80.5100,
+    "landmarks": ["Dining Hall A", "Warden Office"]
+  },
+  {
+    "id": "node_central_dining",
+    "name": "Central Dining & Food Court",
+    "category": "dining",
+    "block_code": "MESS",
+    "floor": "Ground",
+    "latitude": 16.4645,
+    "longitude": 80.5095,
+    "landmarks": ["Convenience Store", "Student Activity Center"]
+  },
+  {
+    "id": "node_health_center",
+    "name": "Campus Health & Medical Centre",
+    "category": "medical",
+    "block_code": "HC",
+    "floor": "Ground",
+    "latitude": 16.4638,
+    "longitude": 80.5088,
+    "landmarks": ["Pharmacy", "Ambulance Bay"]
+  }
+]

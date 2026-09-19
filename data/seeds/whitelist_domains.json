@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Controlled allowlist of official SRMAP domains and subdomains authorized for SAGE crawling",
+  "allowed_domains": [
+    "srmap.edu.in",
+    "www.srmap.edu.in",
+    "admissions.srmap.edu.in",
+    "careers.srmap.edu.in"
+  ],
+  "allowed_subpath_prefixes": [
+    "/notice-board",
+    "/academic-calendar",
+    "/faculty",
+    "/department",
+    "/placements",
+    "/student-affairs",
+    "/examination",
+    "/hostel"
+  ],
+  "disallowed_patterns": [
+    "*/wp-admin/*",
+    "*/login*",
+    "*/cart*",
+    "*.php*",
+    "*/search/*"
+  ]
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "from_node": "node_admin_block",
+    "to_node": "node_academic_block",
+    "distance_meters": 120.0,
+    "accessibility_type": "walking",
+    "instructions": "Walk straight along the central palm avenue towards the main academic atrium."
+  },
+  {
+    "from_node": "node_academic_block",
+    "to_node": "node_central_dining",
+    "distance_meters": 150.0,
+    "accessibility_type": "walking",
+    "instructions": "Exit Academic Block via East Porch and follow the pedestrian walkway towards the Dining Complex."
+  },
+  {
+    "from_node": "node_central_dining",
+    "to_node": "node_hostel_tower_a",
+    "distance_meters": 200.0,
+    "accessibility_type": "walking",
+    "instructions": "Follow the paved pathway behind the dining court heading North to the residential quadrangle."
+  },
+  {
+    "from_node": "node_admin_block",
+    "to_node": "node_health_center",
+    "distance_meters": 60.0,
+    "accessibility_type": "walking",
+    "instructions": "Take the shaded walkway directly adjacent to the western wing of the Admin Block."
+  }
+]

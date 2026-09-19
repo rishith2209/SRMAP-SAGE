@@ -1,0 +1,23 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: srmap_sage_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-srmap_sage}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-srmap_sage_dev_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-srmap_sage_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - srmap_sage_pgdata:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-srmap_sage} -d ${POSTGRES_DB:-srmap_sage_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  srmap_sage_pgdata:
+    driver: local

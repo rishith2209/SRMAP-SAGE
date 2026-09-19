@@ -1,0 +1,26 @@
+[
+  {
+    "id": "dept_cse",
+    "name": "Department of Computer Science and Engineering",
+    "code": "CSE",
+    "block_id": "block_academic"
+  },
+  {
+    "id": "dept_ece",
+    "name": "Department of Electronics and Communication Engineering",
+    "code": "ECE",
+    "block_id": "block_academic"
+  },
+  {
+    "id": "dept_mech",
+    "name": "Department of Mechanical Engineering",
+    "code": "MECH",
+    "block_id": "block_academic"
+  },
+  {
+    "id": "dept_civil",
+    "name": "Department of Civil Engineering",
+    "code": "CIVIL",
+    "block_id": "block_academic"
+  }
+]

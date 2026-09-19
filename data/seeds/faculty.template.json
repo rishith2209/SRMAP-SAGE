@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Dr. Example Faculty",
+    "designation": "Associate Professor & Head",
+    "department_id": "dept_cse",
+    "cabin_number": "Room 304",
+    "block": "Academic Block",
+    "floor": "3rd Floor",
+    "email": "faculty.example@srmap.edu.in",
+    "phone": "+91-863-2343000",
+    "research_areas": [
+      "Artificial Intelligence",
+      "Distributed Systems"
+    ],
+    "profile_url": "https://srmap.edu.in/faculty/example"
+  }
+]
