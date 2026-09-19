@@ -1,5 +1,8 @@
+import json
 import logging
-from typing import List, Tuple, Optional
+import os
+import re
+from typing import List, Tuple, Optional, Dict, Any
 from src.providers.base_provider import BaseLLMProvider
 from src.models.schemas import SourceCitation
 
@@ -22,27 +25,97 @@ ABSOLUTE OPERATIONAL RULES:
 
 
 class RAGEngine:
-    def __init__(self, llm_provider: BaseLLMProvider):
+    def __init__(self, llm_provider: BaseLLMProvider, catalog_path: str = "data/knowledge_catalog.json"):
         self.llm = llm_provider
+        self.catalog_path = catalog_path
+        self._catalog_cache = None
+
+    def _load_catalog(self) -> Dict[str, Any]:
+        if self._catalog_cache is None and os.path.exists(self.catalog_path):
+            try:
+                with open(self.catalog_path, "r", encoding="utf-8") as f:
+                    self._catalog_cache = json.load(f)
+            except Exception as e:
+                logger.error(f"Error loading catalog: {e}")
+                self._catalog_cache = {"chunks": [], "sources": {}}
+        return self._catalog_cache or {"chunks": [], "sources": {}}
+
+    STOP_WORDS = {
+        "what", "how", "when", "where", "why", "who", "which", "is", "are", "was",
+        "were", "the", "a", "an", "in", "on", "at", "to", "for", "from", "of",
+        "with", "by", "does", "do", "can", "could", "would", "should", "and", "or"
+    }
+
+    def retrieve_chunks(self, query: str, top_k: int = 3, min_score: int = 4) -> List[Tuple[str, SourceCitation]]:
+        catalog = self._load_catalog()
+        chunks = catalog.get("chunks", [])
+        if not chunks:
+            return []
+
+        raw_tokens = re.findall(r"\w+", query.lower())
+        tokens = [t for t in raw_tokens if len(t) > 2 and t not in self.STOP_WORDS]
+        if not tokens:
+            return []
+
+        scored = []
+        for ch in chunks:
+            content = ch.get("content", "").lower()
+            source_title = ch.get("source_title", "").lower()
+            domain = ch.get("domain", "").lower()
+
+            score = 0
+            for tok in tokens:
+                if tok in content:
+                    score += 2
+                if tok in source_title:
+                    score += 6
+                if domain and tok in domain:
+                    score += 4
+
+            if score >= min_score:
+                scored.append((score, ch))
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+        results = []
+
+        for score, ch in scored[:top_k]:
+            citation = SourceCitation(
+                id=ch.get("source_id", "doc_unknown"),
+                title=ch.get("source_title", "SRMAP Official Document"),
+                source_type="official_pdf_policy" if ch.get("authority_level") == 1 else "web_source",
+                authority_level=ch.get("authority_level", 1),
+                page_number=ch.get("page_number"),
+                section_heading=ch.get("section_heading"),
+                snippet=ch.get("content", "")[:200]
+            )
+            results.append((ch.get("content", ""), citation))
+
+        return results
 
     async def generate_grounded_answer(
         self,
         query: str,
-        retrieved_chunks: List[Tuple[str, SourceCitation]]
-    ) -> Tuple[str, bool]:
+        retrieved_chunks: Optional[List[Tuple[str, SourceCitation]]] = None
+    ) -> Tuple[str, bool, List[SourceCitation]]:
         """
-        Synthesizes an answer grounded strictly in retrieved chunks.
-        Returns (answer_text, is_fallback).
+        Retrieves context if needed and synthesizes an answer grounded strictly in retrieved chunks.
+        Returns (answer_text, is_fallback, citations).
         """
+        if retrieved_chunks is None:
+            retrieved_chunks = self.retrieve_chunks(query, top_k=3)
+
+        citations = [cit for _, cit in retrieved_chunks]
+
         if not retrieved_chunks:
             return (
                 f"{STRICT_FALLBACK_PHRASE} No verified documents matching your inquiry are currently indexed in SAGE.",
-                True
+                True,
+                []
             )
 
         context_blocks = []
         for idx, (content, citation) in enumerate(retrieved_chunks, start=1):
-            source_header = f"--- EVIDENCE [{idx}] from '{citation.title}' (Authority Level: {citation.authority_level}) ---"
+            source_header = f"--- EVIDENCE [{idx}] from '{citation.title}' (Page {citation.page_number or 'N/A'}, Authority Level: {citation.authority_level}) ---"
             context_blocks.append(f"{source_header}\n{content}\n")
 
         full_context = "\n".join(context_blocks)
@@ -61,4 +134,4 @@ Provide a concise, helpful, and accurate response based strictly on the verified
         )
 
         is_fallback = STRICT_FALLBACK_PHRASE.lower() in response.lower()
-        return response, is_fallback
+        return response, is_fallback, citations

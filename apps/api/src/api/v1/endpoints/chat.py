@@ -55,14 +55,13 @@ async def handle_query(
             ]
         )
 
-    # Handle Procedure or Policy via RAG Engine
-    # When context is empty (e.g., initial state before user provides documents)
-    answer, is_fallback = await rag_engine.generate_grounded_answer(query, [])
+    # Handle Procedure, Policy, Placements, or General inquiry via RAG Engine
+    answer, is_fallback, citations = await rag_engine.generate_grounded_answer(query)
 
     return ChatQueryResponse(
         answer=answer,
         is_fallback=is_fallback,
         intent=intent,
-        confidence=0.85 if not is_fallback else 0.0,
-        sources=[]
+        confidence=0.92 if not is_fallback else 0.0,
+        sources=citations
     )
