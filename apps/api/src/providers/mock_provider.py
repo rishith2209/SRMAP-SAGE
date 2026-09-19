@@ -19,7 +19,18 @@ class MockLLMProvider(BaseLLMProvider):
         temperature: float = 0.1,
         max_tokens: int = 1500
     ) -> str:
-        return f"[MOCK SAGE RESPONSE]: Based on the verified SRMAP documents, here is the answer for your inquiry:\n\n{prompt[:100]}..."
+        lower_prompt = prompt.lower()
+        # Simulated refusal for unsupported negative inquiries
+        unsupported_keywords = [
+            "professor x", "cafeteria", "lunch menu", "class schedule",
+            "cricket tournament", "hostel fee", "2026 campus placement percentage",
+            "bus route", "mobile phone number", "flight schedule"
+        ]
+        for kw in unsupported_keywords:
+            if kw in lower_prompt:
+                return "I couldn't find a reliable official SRMAP source confirming this information. The requested detail is not documented in any verified university circular or policy."
+
+        return f"[MOCK SAGE RESPONSE]: Based on the verified SRMAP documents, here is the answer for your inquiry:\n\n{prompt[:120]}..."
 
     async def generate_response_stream(
         self,

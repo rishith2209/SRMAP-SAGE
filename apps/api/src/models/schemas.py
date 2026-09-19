@@ -10,7 +10,7 @@ class SourceCitation(BaseModel):
     title: str
     url: Optional[str] = None
     source_type: str
-    authority_level: int = Field(ge=1, le=4)
+    authority_level: int = Field(ge=1, le=5)
     published_at: Optional[datetime] = None
     crawled_at: Optional[datetime] = None
     last_verified_at: Optional[datetime] = None

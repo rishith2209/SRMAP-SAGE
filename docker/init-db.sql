@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS sources (
     title VARCHAR(500) NOT NULL,
     url TEXT UNIQUE,
     source_type VARCHAR(50) NOT NULL, -- 'pdf', 'webpage', 'notice', 'structured_dataset'
-    authority_level INT NOT NULL CHECK (authority_level BETWEEN 1 AND 4),
+    authority_level INT NOT NULL CHECK (authority_level BETWEEN 1 AND 5),
     published_at TIMESTAMPTZ,
     crawled_at TIMESTAMPTZ DEFAULT NOW(),
     last_verified_at TIMESTAMPTZ DEFAULT NOW(),

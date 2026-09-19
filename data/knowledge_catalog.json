@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "updated_at": "2026-09-19T05:58:01.197794",
   "sources_count": 19,
-  "chunks_count": 104,
+  "chunks_count": 102,
   "sources": {
     "web_8e779c23fe0f": {
       "id": "web_8e779c23fe0f",
@@ -357,16 +357,6 @@
       "source_id": "web_8e779c23fe0f",
       "source_title": "SRM University-AP - Best Private University in Andhra Pradesh",
       "authority_level": 1
-    },
-    {
-      "page_number": 1,
-      "section_heading": null,
-      "content": "haveloc",
-      "token_count": 1,
-      "extraction_method": "web_scrape",
-      "source_id": "web_931927781013",
-      "source_title": "haveloc",
-      "authority_level": 3
     },
     {
       "page_number": 1,
@@ -1463,19 +1453,6 @@
       "content": "13 \n \nattending further placement opportunities. \n20. In case of discrepancies, all decisions taken by the Directorate of Corporate Relations and Career \nServices would be final and will not be revoked under any circumstances. \n21. Day one sharing Companies (Refer to Classification of companies) – All eligible students must be \npresent on-campus to participate in the Day one sharing companies’ placement process. \n22. Proxy for attendance will be considered as forgery and The Directorate of Corporate Relations \nand Career Services may debar the students from further placement season. \n \n \nThe Directorate of Corporate Relations and Career Services holds the ultimate authority in the event of \nany disputes, and its decisions will be deemed final",
       "token_count": 112,
       "extraction_method": "digital",
-      "source_id": "doc_ce19e8715bbb",
-      "source_title": "B.Tech Placement Policy",
-      "policy_number": null,
-      "policy_date": null,
-      "authority_level": 1,
-      "domain": "PLACEMENTS"
-    },
-    {
-      "page_number": 14,
-      "section_heading": null,
-      "content": "14",
-      "token_count": 1,
-      "extraction_method": "ocr",
       "source_id": "doc_ce19e8715bbb",
       "source_title": "B.Tech Placement Policy",
       "policy_number": null,
