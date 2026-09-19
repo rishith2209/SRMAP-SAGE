@@ -134,7 +134,16 @@ pip install -r requirements.txt
 uvicorn src.main:app --reload --port 8000
 ```
 
-### 5. Setup & Run Frontend UI
+### 5. Ingestion & Evaluation Pipeline
+```bash
+# Ingest all verified SRMAP policy documents and official web sources
+python -m services.ingestion.cli --mode all
+
+# Run the 10-question regression test suite
+python -m services.ingestion.cli --mode eval
+```
+
+### 6. Setup & Run Frontend UI
 ```bash
 cd apps/web
 npm install
