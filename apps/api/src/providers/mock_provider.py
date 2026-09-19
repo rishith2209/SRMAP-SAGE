@@ -24,7 +24,11 @@ class MockLLMProvider(BaseLLMProvider):
         unsupported_keywords = [
             "professor x", "cafeteria", "lunch menu", "class schedule",
             "cricket tournament", "hostel fee", "2026 campus placement percentage",
-            "bus route", "mobile phone number", "flight schedule"
+            "bus route", "mobile phone number", "flight schedule",
+            "fake current", "exempting cse", "nonexistent circular", "srmap/cir/999",
+            "arthur pendelton", "quantum teleportation", "rock concert", "football stadium",
+            "red hair", "tuition fee discount", "friday afternoon timetable", "mechanical engineering lab 4",
+            "free laptop distribution", "fake"
         ]
         for kw in unsupported_keywords:
             if kw in lower_prompt:

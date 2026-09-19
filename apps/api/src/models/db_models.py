@@ -137,3 +137,51 @@ class CommunityReport(Base):
     github_issue_number = Column(Integer, nullable=True)
     status = Column(String(50), default="pending")  # 'pending', 'verified', 'rejected', 'merged'
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+
+class Circular(Base):
+    __tablename__ = "circulars"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    circular_number = Column(String(100), nullable=True)
+    title = Column(String(500), nullable=False)
+    issuing_authority = Column(String(200), nullable=True)
+    published_date = Column(DateTime(timezone=True), nullable=True)
+    effective_from = Column(DateTime(timezone=True), nullable=True)
+    effective_until = Column(DateTime(timezone=True), nullable=True)
+    source_url = Column(Text, nullable=True)
+    domain = Column(String(50), default="NOTICES")
+    authority_level = Column(Integer, default=1)
+    status = Column(String(50), default="CURRENT")  # 'CURRENT', 'SUPERSEDED', 'ARCHIVED'
+    supersedes_id = Column(UUID(as_uuid=True), ForeignKey("circulars.id", ondelete="SET NULL"), nullable=True)
+    content = Column(Text, nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+
+class DocumentVersion(Base):
+    __tablename__ = "document_versions"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    source_id = Column(UUID(as_uuid=True), ForeignKey("sources.id", ondelete="CASCADE"), nullable=False)
+    version_tag = Column(String(50), nullable=False)
+    published_date = Column(DateTime(timezone=True), nullable=True)
+    effective_date = Column(DateTime(timezone=True), nullable=True)
+    content_hash = Column(String(64), nullable=False)
+    superseded_by = Column(UUID(as_uuid=True), nullable=True)
+    change_summary = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+
+class SourceFetchLog(Base):
+    __tablename__ = "source_fetch_logs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    source_url = Column(Text, nullable=False)
+    fetch_status = Column(String(50), nullable=False)  # 'SUCCESS', 'AUTH_REQUIRED', 'FAILED'
+    http_status = Column(Integer, nullable=True)
+    content_hash = Column(String(64), nullable=True)
+    duration_ms = Column(Integer, nullable=True)
+    error_message = Column(Text, nullable=True)
+    fetched_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+

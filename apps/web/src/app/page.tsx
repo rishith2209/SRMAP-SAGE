@@ -24,6 +24,12 @@ interface SourceCitation {
   url?: string;
   source_type: string;
   authority_level: number;
+  page_number?: number;
+  section_heading?: string;
+  snippet?: string;
+  freshness_status?: string;
+  publication_date_str?: string;
+  effective_date_str?: string;
 }
 
 interface Message {
@@ -51,6 +57,7 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"chat" | "explore">("chat");
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [selectedSource, setSelectedSource] = useState<SourceCitation | null>(null);
 
   const quickActions = [
     { label: "Medical Leave Procedure", query: "How do I apply for medical leave?", icon: FileText },
@@ -259,29 +266,71 @@ export default function HomePage() {
                       VERIFIED PROVENANCE (Level {msg.sources[0].authority_level}):
                     </div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                      {msg.sources.map((src) => (
-                        <div
-                          key={src.id}
-                          style={{
-                            background: "rgba(0, 240, 255, 0.05)",
-                            border: "1px solid rgba(0, 240, 255, 0.2)",
-                            borderRadius: "var(--radius-sm)",
-                            padding: "6px 12px",
-                            fontSize: "0.78rem",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                          }}
-                        >
-                          <CheckCircle2 size={13} color="var(--accent-emerald)" />
-                          <span>{src.title}</span>
-                          {src.url && (
-                            <a href={src.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-cyan)" }}>
-                              <ExternalLink size={12} />
-                            </a>
-                          )}
-                        </div>
-                      ))}
+                      {msg.sources.map((src) => {
+                        const isCurrent = src.freshness_status === "CURRENT" || !src.freshness_status;
+                        const badgeColor = isCurrent
+                          ? "var(--accent-emerald)"
+                          : src.freshness_status === "RECENT"
+                          ? "var(--accent-cyan)"
+                          : "var(--accent-amber)";
+                        return (
+                          <div
+                            key={src.id}
+                            onClick={() => setSelectedSource(src)}
+                            style={{
+                              background: "rgba(0, 240, 255, 0.05)",
+                              border: "1px solid rgba(0, 240, 255, 0.2)",
+                              borderRadius: "var(--radius-sm)",
+                              padding: "6px 12px",
+                              fontSize: "0.78rem",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              cursor: "pointer",
+                              transition: "all 0.2s ease",
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = "var(--accent-cyan)";
+                              e.currentTarget.style.background = "rgba(0, 240, 255, 0.12)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = "rgba(0, 240, 255, 0.2)";
+                              e.currentTarget.style.background = "rgba(0, 240, 255, 0.05)";
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: "0.65rem",
+                                fontWeight: 700,
+                                padding: "2px 6px",
+                                borderRadius: "4px",
+                                background: isCurrent ? "rgba(16, 185, 129, 0.2)" : "rgba(245, 158, 11, 0.2)",
+                                color: badgeColor,
+                                letterSpacing: "0.5px",
+                              }}
+                            >
+                              {src.freshness_status || "CURRENT"}
+                            </span>
+                            <span style={{ fontWeight: 500 }}>{src.title}</span>
+                            {src.page_number && (
+                              <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>
+                                (p. {src.page_number})
+                              </span>
+                            )}
+                            {src.url && (
+                              <a
+                                href={src.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                style={{ color: "var(--accent-cyan)", marginLeft: "2px" }}
+                              >
+                                <ExternalLink size={12} />
+                              </a>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -456,6 +505,148 @@ export default function HomePage() {
                 }}
               >
                 Submit to GitHub
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Source Details & Provenance Viewer Modal */}
+      {selectedSource && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: "20px",
+          }}
+        >
+          <div
+            className="animate-fade-in"
+            style={{
+              background: "var(--bg-card)",
+              border: "1px solid var(--accent-cyan)",
+              borderRadius: "var(--radius-lg)",
+              maxWidth: "640px",
+              width: "100%",
+              padding: "24px",
+              boxShadow: "0 0 40px rgba(0, 240, 255, 0.15)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                  <span
+                    style={{
+                      fontSize: "0.7rem",
+                      fontWeight: 700,
+                      padding: "3px 8px",
+                      borderRadius: "4px",
+                      background:
+                        selectedSource.freshness_status === "SUPERSEDED"
+                          ? "rgba(244, 63, 94, 0.2)"
+                          : "rgba(16, 185, 129, 0.2)",
+                      color:
+                        selectedSource.freshness_status === "SUPERSEDED"
+                          ? "var(--accent-rose)"
+                          : "var(--accent-emerald)",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    {selectedSource.freshness_status || "CURRENT"}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "0.7rem",
+                      fontWeight: 600,
+                      padding: "3px 8px",
+                      borderRadius: "4px",
+                      background: "rgba(0, 240, 255, 0.1)",
+                      color: "var(--accent-cyan)",
+                    }}
+                  >
+                    Authority Level {selectedSource.authority_level} (Official SRMAP)
+                  </span>
+                </div>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: 600, color: "var(--text-primary)" }}>
+                  {selectedSource.title}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedSource(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--text-muted)",
+                  fontSize: "1.2rem",
+                  cursor: "pointer",
+                  padding: "4px",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "12px" }}>
+              {selectedSource.publication_date_str && (
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.82rem", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
+                  <span style={{ color: "var(--text-muted)" }}>Publication / Policy Date:</span>
+                  <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{selectedSource.publication_date_str}</span>
+                </div>
+              )}
+
+              {selectedSource.page_number && (
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.82rem", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
+                  <span style={{ color: "var(--text-muted)" }}>Page Number:</span>
+                  <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>Page {selectedSource.page_number}</span>
+                </div>
+              )}
+
+              {selectedSource.url && (
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.82rem", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "8px" }}>
+                  <span style={{ color: "var(--text-muted)" }}>Source URL:</span>
+                  <a
+                    href={selectedSource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "var(--accent-cyan)", wordBreak: "break-all" }}
+                  >
+                    {selectedSource.url}
+                  </a>
+                </div>
+              )}
+
+              {selectedSource.snippet && (
+                <div style={{ marginTop: "8px" }}>
+                  <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginBottom: "4px" }}>
+                    Verified Document Excerpt:
+                  </div>
+                  <div
+                    style={{
+                      background: "var(--bg-secondary)",
+                      border: "1px solid var(--border-color)",
+                      borderRadius: "var(--radius-sm)",
+                      padding: "12px",
+                      fontSize: "0.82rem",
+                      lineHeight: 1.5,
+                      color: "var(--text-secondary)",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    "{selectedSource.snippet}..."
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+              <button className="btn-primary" onClick={() => setSelectedSource(null)}>
+                Close Viewer
               </button>
             </div>
           </div>

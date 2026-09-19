@@ -17,6 +17,9 @@ class SourceCitation(BaseModel):
     snippet: Optional[str] = None
     page_number: Optional[int] = None
     section_heading: Optional[str] = None
+    freshness_status: Optional[str] = "CURRENT"
+    publication_date_str: Optional[str] = None
+    effective_date_str: Optional[str] = None
 
 
 # Adaptive Card UI Schemas
