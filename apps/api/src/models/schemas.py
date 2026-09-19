@@ -43,6 +43,7 @@ class FacultyCardPayload(BaseModel):
     name: str
     designation: str
     department: str
+    school: Optional[str] = None
     cabin_number: Optional[str] = None
     block: Optional[str] = None
     floor: Optional[str] = None
@@ -50,6 +51,20 @@ class FacultyCardPayload(BaseModel):
     phone: Optional[str] = None
     research_areas: List[str] = []
     profile_url: Optional[str] = None
+    source_id: Optional[str] = None
+    status: Optional[str] = "VERIFIED"
+    verified_at: Optional[str] = None
+
+
+class DepartmentCardPayload(BaseModel):
+    id: str
+    name: str
+    code: str
+    school: Optional[str] = None
+    building: Optional[str] = None
+    office: Optional[str] = None
+    source_id: Optional[str] = None
+    verified_at: Optional[str] = None
 
 
 class RouteSegment(BaseModel):
@@ -64,6 +79,8 @@ class NavigationCardPayload(BaseModel):
     total_distance_meters: float
     estimated_walk_minutes: float
     steps: List[RouteSegment]
+    is_gps_verified: bool = False
+    source_id: Optional[str] = "campus_spatial_topology_v1"
 
 
 class PlacementStatItem(BaseModel):
@@ -80,8 +97,57 @@ class PlacementCardPayload(BaseModel):
     summary_note: Optional[str] = None
 
 
+class EventCardPayload(BaseModel):
+    event_id: str
+    title: str
+    description: Optional[str] = None
+    start_datetime: str
+    end_datetime: Optional[str] = None
+    venue: Optional[str] = None
+    organizer: Optional[str] = None
+    registration_url: Optional[str] = None
+    source_url: Optional[str] = None
+    source_id: Optional[str] = "srmap_events_registry"
+    status: str = "CURRENT"
+
+
+class CalendarCardPayload(BaseModel):
+    academic_year: str
+    semester: str
+    event: str
+    event_type: str
+    start_date: str
+    end_date: Optional[str] = None
+    status: str = "CURRENT"
+    source_id: Optional[str] = None
+
+
+class FeeCardPayload(BaseModel):
+    program: str
+    academic_year: str
+    fee_type: str
+    amount: float
+    currency: str = "INR"
+    applicable_from: Optional[str] = None
+    status: str = "VERIFIED"
+    source_id: Optional[str] = None
+
+
+class PolicyCardPayload(BaseModel):
+    title: str
+    policy_number: Optional[str] = None
+    effective_date: Optional[str] = None
+    authority_level: int = 1
+    summary: str
+    key_rules: List[str] = []
+    source_id: str
+
+
 class AdaptiveCard(BaseModel):
-    card_type: Literal["procedure", "faculty", "navigation", "placement", "document", "notice"]
+    card_type: Literal[
+        "procedure", "faculty", "department", "navigation",
+        "placement", "document", "notice", "event", "calendar", "fee", "policy"
+    ]
     payload: Dict[str, Any]
 
 

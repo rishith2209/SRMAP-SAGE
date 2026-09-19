@@ -1,0 +1,42 @@
+[
+  {
+    "id": "dept_cse",
+    "name": "Department of Computer Science and Engineering",
+    "code": "CSE",
+    "school": "School of Engineering and Sciences (SEAS)",
+    "building": "Academic Block",
+    "office": "Academic Block 3rd Floor, West Wing",
+    "source_id": "srmap_dept_registry_v1",
+    "verified_at": "2026-09-19T00:00:00Z"
+  },
+  {
+    "id": "dept_ece",
+    "name": "Department of Electronics and Communication Engineering",
+    "code": "ECE",
+    "school": "School of Engineering and Sciences (SEAS)",
+    "building": "Academic Block",
+    "office": "Academic Block 2nd Floor",
+    "source_id": "srmap_dept_registry_v1",
+    "verified_at": "2026-09-19T00:00:00Z"
+  },
+  {
+    "id": "dept_mech",
+    "name": "Department of Mechanical Engineering",
+    "code": "MECH",
+    "school": "School of Engineering and Sciences (SEAS)",
+    "building": "Academic Block",
+    "office": "Academic Block Ground Floor, East Wing",
+    "source_id": "srmap_dept_registry_v1",
+    "verified_at": "2026-09-19T00:00:00Z"
+  },
+  {
+    "id": "dept_civil",
+    "name": "Department of Civil Engineering",
+    "code": "CIVIL",
+    "school": "School of Engineering and Sciences (SEAS)",
+    "building": "Academic Block",
+    "office": "Academic Block 1st Floor",
+    "source_id": "srmap_dept_registry_v1",
+    "verified_at": "2026-09-19T00:00:00Z"
+  }
+]

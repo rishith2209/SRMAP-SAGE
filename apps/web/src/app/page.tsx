@@ -39,6 +39,10 @@ interface Message {
   intent?: string;
   is_fallback?: boolean;
   sources?: SourceCitation[];
+  adaptive_card?: {
+    card_type: string;
+    payload: any;
+  };
   timestamp: string;
 }
 
@@ -99,6 +103,7 @@ export default function HomePage() {
         intent: data.intent,
         is_fallback: data.is_fallback,
         sources: data.sources || [],
+        adaptive_card: data.adaptive_card,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, sageMessage]);
@@ -255,9 +260,132 @@ export default function HomePage() {
                 </div>
 
                 {/* Body */}
-                <div style={{ fontSize: "0.95rem", lineHeight: 1.6, color: "var(--text-primary)" }}>
+                <div style={{ fontSize: "0.95rem", lineHeight: 1.6, color: "var(--text-primary)", whiteSpace: "pre-line" }}>
                   {msg.text}
                 </div>
+
+                {/* Adaptive Structured Card */}
+                {msg.adaptive_card && (
+                  <div style={{ marginTop: "14px", background: "rgba(0, 240, 255, 0.03)", border: "1px solid rgba(0, 240, 255, 0.25)", borderRadius: "var(--radius-md)", padding: "16px" }}>
+                    {msg.adaptive_card.card_type === "navigation" && (
+                      <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                          <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--accent-cyan)", display: "flex", alignItems: "center", gap: "6px" }}>
+                            <MapPin size={15} /> CAMPUS WALKING ROUTE
+                          </span>
+                          <span style={{ fontSize: "0.72rem", background: "rgba(0, 240, 255, 0.15)", color: "var(--accent-cyan)", padding: "3px 8px", borderRadius: "10px", fontWeight: 600 }}>
+                            ~{msg.adaptive_card.payload.estimated_walk_minutes} min • {msg.adaptive_card.payload.total_distance_meters}m
+                          </span>
+                        </div>
+                        <div style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-primary)", marginBottom: "8px" }}>
+                          {msg.adaptive_card.payload.origin_name} → {msg.adaptive_card.payload.destination_name}
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "8px" }}>
+                          {msg.adaptive_card.payload.steps?.map((step: any, sIdx: number) => (
+                            <div key={sIdx} style={{ display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+                              <span style={{ minWidth: "18px", height: "18px", borderRadius: "50%", background: "rgba(0, 240, 255, 0.15)", color: "var(--accent-cyan)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.68rem", fontWeight: 700 }}>
+                                {sIdx + 1}
+                              </span>
+                              <span>{step.instruction} <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>({step.distance_meters}m)</span></span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {msg.adaptive_card.card_type === "faculty" && (
+                      <div>
+                        <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--accent-cyan)", marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <UserCheck size={15} /> VERIFIED FACULTY DIRECTORY
+                        </div>
+                        <div style={{ fontSize: "1rem", fontWeight: 700, color: "var(--text-primary)" }}>
+                          {msg.adaptive_card.payload.name}
+                        </div>
+                        <div style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginTop: "2px" }}>
+                          {msg.adaptive_card.payload.designation} — {msg.adaptive_card.payload.department}
+                        </div>
+                        <div style={{ marginTop: "10px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "0.78rem" }}>
+                          <div style={{ background: "rgba(255,255,255,0.02)", padding: "6px 10px", borderRadius: "4px" }}>
+                            <span style={{ color: "var(--text-muted)" }}>Cabin: </span>
+                            <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{msg.adaptive_card.payload.cabin_number || "Officially Unreleased"}</span>
+                          </div>
+                          <div style={{ background: "rgba(255,255,255,0.02)", padding: "6px 10px", borderRadius: "4px" }}>
+                            <span style={{ color: "var(--text-muted)" }}>Location: </span>
+                            <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{msg.adaptive_card.payload.block || "Academic Block"}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {msg.adaptive_card.card_type === "department" && (
+                      <div>
+                        <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--accent-cyan)", marginBottom: "6px" }}>
+                          ACADEMIC DEPARTMENT
+                        </div>
+                        <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--text-primary)" }}>
+                          {msg.adaptive_card.payload.name} ({msg.adaptive_card.payload.code})
+                        </div>
+                        <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: "4px" }}>
+                          School: {msg.adaptive_card.payload.school}
+                        </div>
+                        <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: "2px" }}>
+                          Building: {msg.adaptive_card.payload.building} • Office: {msg.adaptive_card.payload.office}
+                        </div>
+                      </div>
+                    )}
+
+                    {msg.adaptive_card.card_type === "fee" && (
+                      <div>
+                        <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--accent-cyan)", marginBottom: "6px" }}>
+                          OFFICIAL UNIVERSITY FEE SCHEDULE
+                        </div>
+                        <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--text-primary)" }}>
+                          {msg.adaptive_card.payload.program}
+                        </div>
+                        <div style={{ marginTop: "6px", fontSize: "0.82rem", color: "var(--text-secondary)" }}>
+                          Category: {msg.adaptive_card.payload.fee_type?.toUpperCase()} • Academic Year: {msg.adaptive_card.payload.academic_year}
+                        </div>
+                        <div style={{ marginTop: "8px", fontSize: "1.1rem", fontWeight: 800, color: "var(--accent-emerald)" }}>
+                          {msg.adaptive_card.payload.currency} {Number(msg.adaptive_card.payload.amount).toLocaleString()}
+                        </div>
+                      </div>
+                    )}
+
+                    {msg.adaptive_card.card_type === "calendar" && (
+                      <div>
+                        <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--accent-cyan)", marginBottom: "6px" }}>
+                          ACADEMIC CALENDAR MILESTONE
+                        </div>
+                        <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--text-primary)" }}>
+                          {msg.adaptive_card.payload.event}
+                        </div>
+                        <div style={{ marginTop: "4px", fontSize: "0.82rem", color: "var(--text-secondary)" }}>
+                          Semester: {msg.adaptive_card.payload.semester} ({msg.adaptive_card.payload.academic_year})
+                        </div>
+                        <div style={{ marginTop: "6px", fontSize: "0.85rem", fontWeight: 600, color: "var(--accent-cyan)" }}>
+                          Date: {msg.adaptive_card.payload.start_date?.substring(0, 10)}
+                        </div>
+                      </div>
+                    )}
+
+                    {msg.adaptive_card.card_type === "event" && (
+                      <div>
+                        <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--accent-cyan)", marginBottom: "6px" }}>
+                          CAMPUS EVENT & ANNOUNCEMENT
+                        </div>
+                        <div style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--text-primary)" }}>
+                          {msg.adaptive_card.payload.title}
+                        </div>
+                        <div style={{ marginTop: "6px", fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+                          Venue: {msg.adaptive_card.payload.venue || "Campus"} • Organizer: {msg.adaptive_card.payload.organizer}
+                        </div>
+                        <div style={{ marginTop: "4px", fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                          Date: {msg.adaptive_card.payload.start_datetime}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Evidence & Provenance Sources */}
                 {msg.sources && msg.sources.length > 0 && (

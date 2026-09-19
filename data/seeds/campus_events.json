@@ -1,0 +1,41 @@
+[
+  {
+    "event_id": "ev_robotics_ws_2026",
+    "title": "One-Day Hands-On Robotics Workshop",
+    "description": "Hosted by the Department of Mechanical Engineering covering autonomous robotic manipulation and ROS integration.",
+    "start_datetime": "2026-09-25T09:30:00Z",
+    "end_datetime": "2026-09-25T17:00:00Z",
+    "venue": "Academic Block Mechanical CAD/CAM Lab",
+    "organizer": "Department of Mechanical Engineering",
+    "registration_url": "https://www.srmap.edu.in/news/department-of-mechanical-engineering-hosts-one-day-hands-on-robotics-workshop/",
+    "source_url": "https://www.srmap.edu.in/news/department-of-mechanical-engineering-hosts-one-day-hands-on-robotics-workshop/",
+    "status": "CURRENT",
+    "authority_level": 1
+  },
+  {
+    "event_id": "ev_springer_symposium_2026",
+    "title": "Global Research Visibility Delegation with Springer Nature",
+    "description": "Interactive walk-through and panel on academic publishing and open research visibility.",
+    "start_datetime": "2026-09-22T10:00:00Z",
+    "end_datetime": "2026-09-22T13:00:00Z",
+    "venue": "Main University Auditorium",
+    "organizer": "Office of Sponsored Research & Consultancy",
+    "registration_url": "https://www.srmap.edu.in/news/srm-ap-strengthens-global-research-visibility-through-partnership-with-springer-nature/",
+    "source_url": "https://www.srmap.edu.in/news/srm-ap-strengthens-global-research-visibility-through-partnership-with-springer-nature/",
+    "status": "CURRENT",
+    "authority_level": 1
+  },
+  {
+    "event_id": "ev_janmashtami_celebration_2026",
+    "title": "Sri Krishna Janmashtami Campus Cultural Festivities",
+    "description": "Traditional cultural performances, classical music recitals, and campus community celebrations.",
+    "start_datetime": "2026-08-26T16:00:00Z",
+    "end_datetime": "2026-08-26T20:00:00Z",
+    "venue": "University Open-Air Amphitheatre",
+    "organizer": "Directorate of Student Affairs",
+    "registration_url": null,
+    "source_url": "https://www.srmap.edu.in/news/srm-ap-celebrates-sri-krishna-janmashtami-with-fervour-and-festivity/",
+    "status": "HISTORICAL",
+    "authority_level": 1
+  }
+]

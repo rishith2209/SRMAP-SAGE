@@ -51,7 +51,12 @@ class Department(Base):
     id = Column(String(50), primary_key=True)
     name = Column(String(200), nullable=False)
     code = Column(String(20), nullable=False, unique=True)
+    school = Column(String(200), nullable=True)  # e.g., 'School of Engineering and Sciences (SEAS)'
+    building = Column(String(100), nullable=True)
+    office = Column(String(100), nullable=True)
     block_id = Column(String(50), nullable=True)
+    source_id = Column(UUID(as_uuid=True), ForeignKey("sources.id", ondelete="SET NULL"), nullable=True)
+    verified_at = Column(DateTime(timezone=True), default=datetime.utcnow)
 
     faculty_members = relationship("Faculty", back_populates="department")
 
@@ -61,9 +66,12 @@ class Faculty(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(200), nullable=False)
+    employee_id = Column(String(50), nullable=True)
     designation = Column(String(100), nullable=False)
     department_id = Column(String(50), ForeignKey("departments.id", ondelete="SET NULL"), nullable=True)
+    school = Column(String(200), nullable=True)
     cabin_number = Column(String(100), nullable=True)
+    office_cabin = Column(String(100), nullable=True)
     block = Column(String(50), nullable=True)
     floor = Column(String(20), nullable=True)
     email = Column(String(200), nullable=True)
@@ -71,6 +79,9 @@ class Faculty(Base):
     research_areas = Column(ARRAY(Text), nullable=True)
     profile_url = Column(Text, nullable=True)
     source_id = Column(UUID(as_uuid=True), ForeignKey("sources.id", ondelete="SET NULL"), nullable=True)
+    source_url = Column(Text, nullable=True)
+    status = Column(String(50), default="VERIFIED")  # 'VERIFIED', 'DATA_NOT_AVAILABLE', 'UNVERIFIED'
+    verified_at = Column(DateTime(timezone=True), default=datetime.utcnow)
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow)
 
     department = relationship("Department", back_populates="faculty_members")
@@ -99,12 +110,15 @@ class CampusNode(Base):
 
     id = Column(String(100), primary_key=True)
     name = Column(String(200), nullable=False)
-    category = Column(String(50), nullable=False)  # 'building', 'hostel', 'lab', 'office', 'dining', 'medical'
+    category = Column(String(50), nullable=False)  # 'BUILDING', 'BLOCK', 'ROOM', 'LAB', 'OFFICE', 'HOSTEL', 'GATE', 'LIBRARY', 'CAFETERIA', 'AUDITORIUM', 'SPORTS', 'MEDICAL', 'PARKING'
     block_code = Column(String(20), nullable=True)
     floor = Column(String(20), nullable=True)
+    building = Column(String(100), nullable=True)
     latitude = Column(Numeric(10, 8), nullable=True)
     longitude = Column(Numeric(11, 8), nullable=True)
     landmarks = Column(ARRAY(Text), nullable=True)
+    source_id = Column(UUID(as_uuid=True), ForeignKey("sources.id", ondelete="SET NULL"), nullable=True)
+    verified = Column(Boolean, default=True)
 
     outgoing_edges = relationship("CampusEdge", foreign_keys="CampusEdge.from_node", back_populates="source_node")
     incoming_edges = relationship("CampusEdge", foreign_keys="CampusEdge.to_node", back_populates="target_node")
@@ -117,11 +131,68 @@ class CampusEdge(Base):
     from_node = Column(String(100), ForeignKey("campus_nodes.id", ondelete="CASCADE"), nullable=False)
     to_node = Column(String(100), ForeignKey("campus_nodes.id", ondelete="CASCADE"), nullable=False)
     distance_meters = Column(Numeric(6, 2), nullable=False)
+    walking_distance = Column(Numeric(6, 2), nullable=True)
     accessibility_type = Column(String(50), default="walking")
+    accessible = Column(Boolean, default=True)
     instructions = Column(Text, nullable=True)
+    description = Column(Text, nullable=True)
+    source_id = Column(UUID(as_uuid=True), ForeignKey("sources.id", ondelete="SET NULL"), nullable=True)
 
     source_node = relationship("CampusNode", foreign_keys=[from_node], back_populates="outgoing_edges")
     target_node = relationship("CampusNode", foreign_keys=[to_node], back_populates="incoming_edges")
+
+
+class AcademicCalendarItem(Base):
+    __tablename__ = "academic_calendar"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    academic_year = Column(String(20), nullable=False)  # e.g., '2026-2027'
+    semester = Column(String(20), nullable=False)       # 'ODD', 'EVEN', 'SUMMER'
+    event = Column(String(200), nullable=False)
+    event_type = Column(String(50), nullable=False)     # 'semester_start', 'semester_end', 'exam', 'registration', 'holiday', 'result', 'break', 'orientation'
+    start_date = Column(DateTime(timezone=True), nullable=False)
+    end_date = Column(DateTime(timezone=True), nullable=True)
+    source_id = Column(UUID(as_uuid=True), ForeignKey("sources.id", ondelete="SET NULL"), nullable=True)
+    published_at = Column(DateTime(timezone=True), nullable=True)
+    effective_from = Column(DateTime(timezone=True), nullable=True)
+    status = Column(String(50), default="CURRENT")      # 'CURRENT', 'SUPERSEDED', 'HISTORICAL'
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+
+class FeeSchedule(Base):
+    __tablename__ = "fee_schedules"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    program = Column(String(100), nullable=False)      # 'B.Tech CSE', 'M.Tech', 'Ph.D'
+    academic_year = Column(String(20), nullable=False) # e.g., '2023-2024'
+    fee_type = Column(String(50), nullable=False)      # 'tuition', 'hostel', 'transport', 'exam', 'registration'
+    amount = Column(Numeric(10, 2), nullable=False)
+    currency = Column(String(10), default="INR")
+    applicable_from = Column(DateTime(timezone=True), nullable=True)
+    applicable_until = Column(DateTime(timezone=True), nullable=True)
+    source_id = Column(UUID(as_uuid=True), ForeignKey("sources.id", ondelete="SET NULL"), nullable=True)
+    verified_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+    status = Column(String(50), default="VERIFIED")    # 'VERIFIED', 'NOT_VERIFIED', 'SUPERSEDED'
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+
+class CampusEvent(Base):
+    __tablename__ = "campus_events"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    event_id = Column(String(100), unique=True, nullable=False)
+    title = Column(String(500), nullable=False)
+    description = Column(Text, nullable=True)
+    start_datetime = Column(DateTime(timezone=True), nullable=False)
+    end_datetime = Column(DateTime(timezone=True), nullable=True)
+    venue = Column(String(200), nullable=True)
+    organizer = Column(String(200), nullable=True)
+    registration_url = Column(Text, nullable=True)
+    source_url = Column(Text, nullable=True)
+    published_at = Column(DateTime(timezone=True), nullable=True)
+    status = Column(String(50), default="CURRENT")     # 'CURRENT', 'HISTORICAL', 'CANCELLED'
+    authority_level = Column(Integer, default=1)
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
 
 
 class CommunityReport(Base):
@@ -135,7 +206,15 @@ class CommunityReport(Base):
     suggested_correction = Column(Text, nullable=True)
     provided_evidence_url = Column(Text, nullable=True)
     github_issue_number = Column(Integer, nullable=True)
-    status = Column(String(50), default="pending")  # 'pending', 'verified', 'rejected', 'merged'
+    submitted_by = Column(String(200), nullable=True)
+    content = Column(Text, nullable=True)
+    entity_type = Column(String(50), nullable=True)
+    entity_id = Column(String(100), nullable=True)
+    status = Column(String(50), default="PENDING")     # 'PENDING', 'UNDER_REVIEW', 'VERIFIED', 'REJECTED', 'DUPLICATE'
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    reviewer = Column(String(100), nullable=True)
+    resolution = Column(Text, nullable=True)
+    source_reference = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
 
 

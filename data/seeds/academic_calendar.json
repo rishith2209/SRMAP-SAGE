@@ -1,0 +1,42 @@
+[
+  {
+    "academic_year": "2026-2027",
+    "semester": "ODD",
+    "event": "Commencement of Classes for B.Tech Odd Semester",
+    "event_type": "semester_start",
+    "start_date": "2026-08-03T09:00:00Z",
+    "end_date": "2026-08-03T17:00:00Z",
+    "status": "CURRENT",
+    "source_id": "srmap_academic_calendar_2026_27"
+  },
+  {
+    "academic_year": "2026-2027",
+    "semester": "ODD",
+    "event": "Mid-Semester Examinations (Odd Semester)",
+    "event_type": "exam",
+    "start_date": "2026-10-12T09:00:00Z",
+    "end_date": "2026-10-17T17:00:00Z",
+    "status": "CURRENT",
+    "source_id": "srmap_academic_calendar_2026_27"
+  },
+  {
+    "academic_year": "2026-2027",
+    "semester": "ODD",
+    "event": "End Semester Examinations & Grade Finalization",
+    "event_type": "exam",
+    "start_date": "2026-12-01T09:00:00Z",
+    "end_date": "2026-12-16T17:00:00Z",
+    "status": "CURRENT",
+    "source_id": "srmap_academic_calendar_2026_27"
+  },
+  {
+    "academic_year": "2025-2026",
+    "semester": "EVEN",
+    "event": "End Semester Examinations 2025-26",
+    "event_type": "exam",
+    "start_date": "2026-05-04T09:00:00Z",
+    "end_date": "2026-05-20T17:00:00Z",
+    "status": "HISTORICAL",
+    "source_id": "srmap_academic_calendar_2025_26"
+  }
+]

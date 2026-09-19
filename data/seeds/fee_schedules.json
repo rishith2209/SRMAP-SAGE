@@ -1,0 +1,32 @@
+[
+  {
+    "program": "B.Tech Computer Science and Engineering",
+    "academic_year": "2024-2025",
+    "fee_type": "tuition",
+    "amount": 315000.0,
+    "currency": "INR",
+    "applicable_from": "2024-07-01T00:00:00Z",
+    "status": "VERIFIED",
+    "source_id": "srmap_admissions_fee_circular_2024"
+  },
+  {
+    "program": "B.Tech Electronics and Communication Engineering",
+    "academic_year": "2024-2025",
+    "fee_type": "tuition",
+    "amount": 260000.0,
+    "currency": "INR",
+    "applicable_from": "2024-07-01T00:00:00Z",
+    "status": "VERIFIED",
+    "source_id": "srmap_admissions_fee_circular_2024"
+  },
+  {
+    "program": "All Undergraduate Programs",
+    "academic_year": "2024-2025",
+    "fee_type": "registration",
+    "amount": 10000.0,
+    "currency": "INR",
+    "applicable_from": "2024-07-01T00:00:00Z",
+    "status": "VERIFIED",
+    "source_id": "srmap_admissions_fee_circular_2024"
+  }
+]
