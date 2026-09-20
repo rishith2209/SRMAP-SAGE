@@ -43,6 +43,9 @@ interface Message {
     card_type: string;
     payload: any;
   };
+  verification_status?: string;
+  refusal_code?: string;
+  evidence?: any[];
   timestamp: string;
 }
 
@@ -54,6 +57,7 @@ export default function HomePage() {
       id: "welcome",
       sender: "sage",
       text: "Welcome to **SRMAP SAGE** — your verified Student Assistance & Guidance Engine. Ask me about academic regulations, medical leave procedures, faculty cabins, campus directions, or placement records.",
+      verification_status: "VERIFIED",
       timestamp: "Just now",
     },
   ]);
@@ -104,6 +108,9 @@ export default function HomePage() {
         is_fallback: data.is_fallback,
         sources: data.sources || [],
         adaptive_card: data.adaptive_card,
+        verification_status: data.verification_status,
+        refusal_code: data.refusal_code,
+        evidence: data.evidence || [],
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, sageMessage]);
@@ -114,6 +121,7 @@ export default function HomePage() {
         sender: "sage",
         text: "I couldn't connect to the live backend service. Please ensure the API is running at `http://localhost:8000`.",
         is_fallback: true,
+        verification_status: "REFUSED",
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, offlineMsg]);
@@ -253,9 +261,45 @@ export default function HomePage() {
               >
                 {/* Message Header */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                  <span style={{ fontSize: "0.8rem", fontWeight: 600, color: msg.sender === "user" ? "#e0f2fe" : "var(--accent-cyan)" }}>
-                    {msg.sender === "user" ? "You" : "SRMAP SAGE"}
-                  </span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "0.8rem", fontWeight: 600, color: msg.sender === "user" ? "#e0f2fe" : "var(--accent-cyan)" }}>
+                      {msg.sender === "user" ? "You" : "SRMAP SAGE"}
+                    </span>
+                    {msg.sender === "sage" && (
+                      <span
+                        style={{
+                          fontSize: "0.68rem",
+                          fontWeight: 700,
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          background: msg.is_fallback || msg.verification_status === "REFUSED"
+                            ? "rgba(239, 68, 68, 0.15)"
+                            : "rgba(16, 185, 129, 0.15)",
+                          color: msg.is_fallback || msg.verification_status === "REFUSED"
+                            ? "var(--accent-rose)"
+                            : "var(--accent-emerald)",
+                          border: msg.is_fallback || msg.verification_status === "REFUSED"
+                            ? "1px solid rgba(239, 68, 68, 0.3)"
+                            : "1px solid rgba(16, 185, 129, 0.3)",
+                        }}
+                      >
+                        {msg.is_fallback || msg.verification_status === "REFUSED" ? (
+                          <>
+                            <AlertTriangle size={11} />
+                            {msg.refusal_code || "REFUSAL"}
+                          </>
+                        ) : (
+                          <>
+                            <ShieldCheck size={11} />
+                            VERIFIED EVIDENCE
+                          </>
+                        )}
+                      </span>
+                    )}
+                  </div>
                   <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>{msg.timestamp}</span>
                 </div>
 

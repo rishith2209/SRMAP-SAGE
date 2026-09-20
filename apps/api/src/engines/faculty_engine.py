@@ -107,10 +107,19 @@ class FacultyEngine:
                 clean_q = clean_q[len(prefix):].strip()
 
         matched = None
-        q_tokens = set(re.findall(r"\b[a-z0-9]+\b", clean_q))
+        q_tokens = set(re.findall(r"\b[a-z0-9]+\b", clean_q)) - {
+            "who", "is", "where", "what", "the", "cabin", "professor", "prof", "dr", "office", "of", "room"
+        }
         for fac_name, data in self._faculty_records.items():
             fac_tokens = set(re.findall(r"\b[a-z0-9]+\b", fac_name))
-            if clean_q in fac_name or fac_name in clean_q or (q_tokens and q_tokens.issubset(fac_tokens)):
+            fac_substantive = fac_tokens - {"prof", "dr", "professor", "mr", "ms", "k", "s", "m", "r", "dr."}
+            if clean_q in fac_name or fac_name in clean_q:
+                matched = data
+                break
+            if fac_substantive and fac_substantive.issubset(q_tokens):
+                matched = data
+                break
+            if q_tokens and q_tokens.issubset(fac_tokens):
                 matched = data
                 break
 

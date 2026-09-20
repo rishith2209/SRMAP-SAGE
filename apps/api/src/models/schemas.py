@@ -151,6 +151,113 @@ class AdaptiveCard(BaseModel):
     payload: Dict[str, Any]
 
 
+# =============================================================================
+# Phase 5: Agentic Evidence Orchestration Schemas
+# =============================================================================
+
+class EvidenceItem(BaseModel):
+    """
+    Standardized evidence unit across all specialized engines.
+    NOTE: `confidence` is solely a retrieval/relevance score and NEVER overrides
+    authority levels, dates, supersession relationships, or provenance.
+    """
+    id: str
+    source_id: str
+    source_type: str
+    authority_level: int = Field(ge=1, le=5)
+    title: str
+    url: Optional[str] = None
+    page: Optional[int] = None
+    excerpt: str
+    published_at: Optional[str] = None
+    verified_at: Optional[str] = None
+    freshness_status: str = "CURRENT"
+    confidence: float = Field(default=1.0, description="Retrieval/relevance score ONLY, does not signify truth")
+    engine: str
+    content_hash: str
+    domain: Optional[str] = None
+    entity_scope: Optional[str] = None
+
+
+class QueryPlan(BaseModel):
+    query: str
+    intents: List[str] = []
+    engines: List[str] = []
+    requires_current_data: bool = False
+    requires_multiple_sources: bool = False
+    verification_required: bool = True
+    max_iterations: int = 3
+    tool_budget: Dict[str, int] = Field(
+        default_factory=lambda: {
+            "max_retrieval_iterations": 3,
+            "max_web_fetches": 5,
+            "max_engine_calls": 8
+        }
+    )
+
+
+class ConflictAssessment(BaseModel):
+    conflict_type: Literal[
+        "NO_CONFLICT",
+        "TEMPORAL_UPDATE",
+        "AUTHORITY_CONFLICT",
+        "CONTENT_CONFLICT",
+        "UNRESOLVED",
+        "TEMPORAL_RELATIONSHIP_UNKNOWN"
+    ] = "NO_CONFLICT"
+    has_conflict: bool = False
+    superseding_source_id: Optional[str] = None
+    explanation: Optional[str] = None
+    applicable_claims: List[str] = []
+
+
+class RefusalReason(BaseModel):
+    code: Literal[
+        "INSUFFICIENT_EVIDENCE",
+        "SOURCE_UNAVAILABLE",
+        "AUTHENTICATION_REQUIRED",
+        "CONFLICT_UNRESOLVED",
+        "OUTDATED_INFORMATION",
+        "UNKNOWN_ENTITY",
+        "UNVERIFIED_CURRENT_INFORMATION"
+    ]
+    message: str
+    required_evidence: Optional[str] = None
+
+
+class ClaimVerificationResult(BaseModel):
+    claim_text: str
+    supported: bool
+    supporting_evidence_ids: List[str] = []
+    confidence_note: Optional[str] = None
+
+
+class ExecutionStep(BaseModel):
+    step_name: str
+    timestamp: str
+    details: Dict[str, Any] = {}
+    duration_ms: float = 0.0
+
+
+class ExecutionTrace(BaseModel):
+    query: str
+    steps: List[ExecutionStep] = []
+    total_engine_calls: int = 0
+    total_web_fetches: int = 0
+    total_iterations: int = 0
+
+
+class AnswerContract(BaseModel):
+    answer: str
+    evidence: List[EvidenceItem] = []
+    sources: List[SourceCitation] = []
+    freshness: str = "CURRENT"
+    caveats: List[str] = []
+    refusal_reason: Optional[RefusalReason] = None
+    verification_status: Literal["VERIFIED", "PARTIALLY_VERIFIED", "UNVERIFIED", "REFUSED"] = "VERIFIED"
+    trace: Optional[Dict[str, Any]] = None
+
+
 # Chat & Query Schemas
 class ChatQueryRequest(BaseModel):
     query: str = Field(min_length=2, max_length=1000)
@@ -167,6 +274,13 @@ class ChatQueryResponse(BaseModel):
     adaptive_card: Optional[AdaptiveCard] = None
     conflict_detected: bool = False
     conflict_note: Optional[str] = None
+    # Phase 5 Additions
+    verification_status: Optional[str] = "VERIFIED"
+    evidence: List[EvidenceItem] = []
+    refusal_code: Optional[str] = None
+    refusal_required_evidence: Optional[str] = None
+    execution_trace: Optional[Dict[str, Any]] = None
+    contract: Optional[AnswerContract] = None
 
 
 # Community Feedback Schemas
@@ -184,3 +298,4 @@ class CommunityReportResponse(BaseModel):
     status: str
     github_issue_number: Optional[int] = None
     message: str
+

@@ -18,9 +18,9 @@ class IntentRouter:
     PATTERNS = {
         # Navigation & Spatial
         "CAMPUS_DIRECTIONS": [
-            r"\b(how do i go|how to go|how to reach|directions to|route to|where is block|where is hostel|way to)\b",
+            r"\b(how do i (go|get|reach)|how to (go|get|reach)|directions to|route to|where is block|where is hostel|way to)\b",
             r"\b(from .+ to .+|nearest (medical|canteen|library|washroom|clinic))\b",
-            r"\b(where is the library|how to get to library|how do i reach)\b"
+            r"\b(where is the library|how to get to|how do i reach|where is)\b"
         ],
         # Faculty & Department
         "FACULTY_LOOKUP": [
@@ -122,7 +122,7 @@ class IntentRouter:
             subintents.append("FACULTY")
         if any(k in q for k in ["placement", "company", "package", "crcs"]):
             subintents.append("PLACEMENT")
-        if any(k in q for k in ["where is", "how do i go", "how to reach", "directions", "location", "office located"]):
+        if any(k in q for k in ["where is", "where are", "how do i go", "how do i get", "how to reach", "directions", "location", "office located", "held on campus"]):
             subintents.append("SPATIAL")
         if any(k in q for k in ["notice", "announcement", "event", "workshop"]):
             subintents.append("EVENT")

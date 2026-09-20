@@ -145,6 +145,15 @@ class CampusSpatialEngine:
                     landmarks=target_data.get("landmarks", [])
                 )
             )
+        if not route_segments and origin_id == destination_id:
+            route_segments.append(
+                RouteSegment(
+                    instruction=f"You are at {self.nodes_data.get(destination_id, {}).get('name', destination_id)}. Proceed inside.",
+                    distance_meters=10.0,
+                    landmarks=[]
+                )
+            )
+            total_distance = 10.0
 
         walk_minutes = round(total_distance / (self.WALKING_SPEED_METERS_PER_SEC * 60), 1)
 
