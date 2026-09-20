@@ -24,7 +24,7 @@ from src.models.schemas import (
     ExecutionStep, ExecutionTrace, AnswerContract, SourceCitation,
     ChatQueryResponse, AdaptiveCard, NavigationCardPayload,
     FacultyCardPayload, DepartmentCardPayload, CalendarCardPayload,
-    FeeCardPayload, EventCardPayload
+    FeeCardPayload, EventCardPayload, ClarificationCardPayload
 )
 from src.providers.base_provider import BaseLLMProvider
 from src.engines.router_engine import IntentRouter
@@ -104,10 +104,122 @@ class AgentOrchestrator:
     def _hash_content(self, text: str) -> str:
         return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
 
+    @staticmethod
+    def detect_ambiguity(query: str) -> Optional[ClarificationCardPayload]:
+        q = re.sub(r"[?!.,]", "", query.lower().strip())
+
+        # 1. Underspecified Fee
+        if q in ["what is the fee", "what are the fees", "tell me the fee", "fee structure", "how much is the fee"]:
+            return ClarificationCardPayload(
+                prompt="I can help with that. Which fee category do you mean?",
+                options=[
+                    "Tuition Fee (B.Tech CSE / Engineering)",
+                    "Hostel & Accommodation Fee",
+                    "Examination Fee",
+                    "Transportation Fee",
+                    "Registration & Admission Fee"
+                ],
+                category="FEES",
+                suggested_queries=[
+                    "What is the B.Tech CSE tuition fee?",
+                    "What is the hostel accommodation fee?",
+                    "What is the examination fee?"
+                ]
+            )
+
+        # 2. Underspecified Exam milestone
+        if q in ["when is the exam", "when are exams", "exam dates", "when will exams be held", "exam schedule"]:
+            return ClarificationCardPayload(
+                prompt="I can help with that. Which examination milestone do you mean?",
+                options=[
+                    "Mid-Semester Examinations",
+                    "End-Semester Examinations",
+                    "Practical / Laboratory Examinations",
+                    "Arrear & Supplementary Examinations"
+                ],
+                category="CALENDAR",
+                suggested_queries=[
+                    "When are the mid semester exams?",
+                    "When are the end semester exams?",
+                    "What are the academic calendar exam dates?"
+                ]
+            )
+
+        # 3. Underspecified Office location
+        if q in ["where is the office", "how do i reach the office", "where is office located", "location of office"]:
+            return ClarificationCardPayload(
+                prompt="I can help with that. Which office do you need to reach?",
+                options=[
+                    "Academic Administration Office",
+                    "Directorate of Student Affairs",
+                    "Corporate Relations & Career Services (CRCS Placement Office)",
+                    "Registrar's Office"
+                ],
+                category="SPATIAL",
+                suggested_queries=[
+                    "Where is the placement office?",
+                    "Where is the CSE department office?",
+                    "Where is the administrative block?"
+                ]
+            )
+
+        # 4. Underspecified Placement eligibility
+        if q in ["what is the placement eligibility", "placement criteria", "who is eligible for placement"]:
+            return ClarificationCardPayload(
+                prompt="I can help with that. Which placement criteria are you looking for?",
+                options=[
+                    "General University Policy Baseline (CGPA & Backlogs)",
+                    "Company / Recruiter Specific Job Criteria",
+                    "Deferred Placement Policy Options"
+                ],
+                category="PLACEMENT",
+                suggested_queries=[
+                    "What are the B.Tech placement eligibility requirements?",
+                    "What is the deferred placement policy?",
+                    "What is the minimum CGPA for campus placements?"
+                ]
+            )
+
+        return None
+
     async def execute_query(self, query: str) -> ChatQueryResponse:
         """
         Runs the 10-step bounded agent orchestration lifecycle.
         """
+        # Guard against malformed input, buffer overflow payloads, and SQL injection strings
+        if len(query) > 1000 or any(sqli in query.upper() for sqli in ["DROP TABLE", "SELECT * FROM", "UNION SELECT", "INSERT INTO", "DELETE FROM"]):
+            msg, reason = RefusalEngine.create_refusal(
+                code="INSUFFICIENT_EVIDENCE",
+                query=query[:60],
+                missing_detail="valid natural language student inquiry",
+                required_evidence="Official SRMAP inquiry syntax"
+            )
+            return ChatQueryResponse(
+                answer=msg,
+                is_fallback=True,
+                intent="UNKNOWN",
+                confidence=0.0,
+                sources=[],
+                verification_status="REFUSED",
+                refusal_code="INSUFFICIENT_EVIDENCE"
+            )
+
+        # Check for underspecified ambiguity before execution
+        clarification_payload = self.detect_ambiguity(query)
+        if clarification_payload:
+            options_text = "\n".join([f"• {opt}" for opt in clarification_payload.options])
+            answer_text = f"{clarification_payload.prompt}\n\n{options_text}"
+            return ChatQueryResponse(
+                answer=answer_text,
+                is_fallback=False,
+                intent="CLARIFICATION",
+                confidence=1.0,
+                sources=[],
+                adaptive_card=AdaptiveCard(card_type="clarification", payload=clarification_payload.model_dump()),
+                verification_status="VERIFIED",
+                is_clarification=True
+            )
+
         start_time = time.time()
         trace = ExecutionTrace(query=query)
 
@@ -456,8 +568,6 @@ class AgentOrchestrator:
                 is_hist = "historical" in query.lower() or "past" in query.lower()
                 status_filter = "HISTORICAL" if is_hist else "CURRENT"
                 evs = self.events.query_events(keyword=query, status=status_filter)
-                if not evs:
-                    evs = self.events.query_events(status=status_filter)
 
                 if not evs:
                     msg, reason = RefusalEngine.create_refusal(

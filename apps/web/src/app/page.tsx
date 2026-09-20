@@ -428,6 +428,43 @@ export default function HomePage() {
                         </div>
                       </div>
                     )}
+
+                    {msg.adaptive_card.card_type === "clarification" && (
+                      <div>
+                        <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--accent-cyan)", marginBottom: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <Sparkles size={14} /> CLARIFICATION REQUIRED — PLEASE SELECT AN OPTION:
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
+                          {msg.adaptive_card.payload.options?.map((opt: string, i: number) => (
+                            <button
+                              key={i}
+                              onClick={() => handleSend(opt)}
+                              style={{
+                                background: "rgba(0, 240, 255, 0.1)",
+                                border: "1px solid rgba(0, 240, 255, 0.4)",
+                                color: "#00f0ff",
+                                borderRadius: "20px",
+                                padding: "6px 14px",
+                                fontSize: "0.85rem",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                                transition: "all 0.2s ease",
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = "rgba(0, 240, 255, 0.25)";
+                                e.currentTarget.style.borderColor = "#00f0ff";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = "rgba(0, 240, 255, 0.1)";
+                                e.currentTarget.style.borderColor = "rgba(0, 240, 255, 0.4)";
+                              }}
+                            >
+                              {opt} →
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 

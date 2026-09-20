@@ -88,16 +88,35 @@ class EventsEngine:
         keyword: Optional[str] = None,
         status: Optional[str] = None
     ) -> List[EventCardPayload]:
-        """Queries events with keyword matching and status filtering."""
-        results = []
+        """Queries events with substantive keyword matching and status filtering."""
+        import re
         kw = keyword.lower().strip() if keyword else ""
+        stop_words = {
+            "when", "is", "the", "what", "where", "are", "scheduled", "taking", "place",
+            "happening", "event", "events", "campus", "srmap", "upcoming", "this", "week",
+            "at", "in", "for", "on", "a", "an", "take", "to"
+        }
+        tokens = [w for w in re.findall(r"\w+", kw) if len(w) > 2 and w not in stop_words]
 
+        scored_events = []
         for ev in self._events:
             if status and ev.get("status") != status:
                 continue
-            if kw and (kw not in ev["title"].lower() and kw not in ev.get("description", "").lower()):
-                continue
 
+            ev_text = (ev["title"] + " " + ev.get("description", "")).lower()
+            if tokens:
+                score = sum(1 for t in tokens if t in ev_text)
+                if score > 0:
+                    scored_events.append((score, ev))
+            else:
+                scored_events.append((1, ev))
+
+        if tokens and not scored_events:
+            return []
+
+        scored_events.sort(key=lambda x: x[0], reverse=True)
+        results = []
+        for _, ev in scored_events:
             results.append(
                 EventCardPayload(
                     event_id=ev["event_id"],

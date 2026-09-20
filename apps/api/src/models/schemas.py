@@ -143,10 +143,22 @@ class PolicyCardPayload(BaseModel):
     source_id: str
 
 
+class ClarificationOption(BaseModel):
+    label: str
+    sample_query: str
+
+
+class ClarificationCardPayload(BaseModel):
+    prompt: str
+    options: List[str]
+    category: str
+    suggested_queries: List[str] = []
+
+
 class AdaptiveCard(BaseModel):
     card_type: Literal[
         "procedure", "faculty", "department", "navigation",
-        "placement", "document", "notice", "event", "calendar", "fee", "policy"
+        "placement", "document", "notice", "event", "calendar", "fee", "policy", "clarification"
     ]
     payload: Dict[str, Any]
 
@@ -281,6 +293,8 @@ class ChatQueryResponse(BaseModel):
     refusal_required_evidence: Optional[str] = None
     execution_trace: Optional[Dict[str, Any]] = None
     contract: Optional[AnswerContract] = None
+    # Phase 6 Additions
+    is_clarification: bool = False
 
 
 # Community Feedback Schemas
@@ -298,4 +312,63 @@ class CommunityReportResponse(BaseModel):
     status: str
     github_issue_number: Optional[int] = None
     message: str
+
+
+# =============================================================================
+# Phase 6: Admin & Health Monitoring Schemas
+# =============================================================================
+
+class AdminHealthMetrics(BaseModel):
+    status: str
+    service: str = "srmap-sage-api"
+    version: str = "1.0.0"
+    database_connected: bool
+    total_documents: int
+    total_chunks: int
+    total_sources: int
+    total_faculty: int
+    total_departments: int
+    total_events: int
+    total_calendar_milestones: int
+    total_fee_schedules: int
+    total_spatial_nodes: int
+    pending_community_reports: int
+    active_conflicts: int
+    freshness_summary: Dict[str, int]
+
+
+class AdminSourceHealthItem(BaseModel):
+    source_id: str
+    title: str
+    url: Optional[str] = None
+    source_type: str
+    authority_level: int
+    freshness_status: str
+    last_verified_at: Optional[str] = None
+    chunk_count: int = 0
+    error_count: int = 0
+
+
+class AdminDocumentSummary(BaseModel):
+    source_id: str
+    title: str
+    policy_number: Optional[str] = None
+    policy_date: Optional[str] = None
+    authority_level: int
+    chunks_count: int
+    sha256: Optional[str] = None
+    freshness_status: str = "CURRENT"
+
+
+class AdminReportItem(BaseModel):
+    id: str
+    query_text: str
+    generated_answer: str
+    category: str
+    report_reason: str
+    suggested_correction: Optional[str] = None
+    status: str
+    created_at: Optional[str] = None
+    github_issue_number: Optional[int] = None
+
 

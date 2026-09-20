@@ -24,8 +24,8 @@ class IntentRouter:
         ],
         # Faculty & Department
         "FACULTY_LOOKUP": [
-            r"\b(where is prof|where is professor|where is dr|cabin of|office of|contact prof|faculty|hod of)\b",
-            r"\b(who is teaching|who teaches|faculty member|professor [a-z]+)\b"
+            r"\b(where is prof|where is professor|where is dr|who is prof|who is professor|who is dr|cabin of|office of|contact prof|faculty|hod of)\b",
+            r"\b(who is teaching|who teaches|faculty member|professor [a-z]+|dr\.?\s+[a-z]+)\b"
         ],
         "DEPARTMENT_LOOKUP": [
             r"\b(where is the [a-z]+ department|head of [a-z]+ department|dept of [a-z]+|department of [a-z]+)\b"
@@ -50,8 +50,8 @@ class IntentRouter:
         ],
         # Calendar & Milestones
         "ACADEMIC_CALENDAR": [
-            r"\b(academic calendar|semester start|classes begin|mid[- ]semester exam|end semester exam dates|holiday list|exam dates)\b",
-            r"\b(when do classes start|when are exams|calendar 2026)\b"
+            r"\b(academic calendar|semester start|classes begin|classes commence|commencement of classes|mid[- ]semester (exam|examination|exams|examinations)|end[- ]semester (exam|examination|exams|examinations)|holiday list|exam dates)\b",
+            r"\b(when do classes start|when are exams|calendar 2026|calendar|historical academic calendar|academic calendar for 2025)\b"
         ],
         # Fees & Charges
         "FEE_QUERY": [
@@ -59,7 +59,7 @@ class IntentRouter:
         ],
         # Events & Activities
         "CURRENT_EVENT": [
-            r"\b(happening this week|upcoming events|cultural fest|hackathon|seminar today|notices today|robotics workshop|event)\b"
+            r"\b(happening this week|upcoming events|cultural fest|hackathon|seminar today|notices today|robotics workshop|event|springer)\b"
         ],
         # Hostel & Facilities
         "HOSTEL_FACILITIES": [
@@ -77,7 +77,7 @@ class IntentRouter:
         """Rule-based fast classification for minimal latency."""
         q = query.lower()
 
-        # Check hybrid patterns first
+        is_att = any(re.search(p, q) for p in self.PATTERNS["ATTENDANCE_POLICY"])
         is_nav = any(re.search(p, q) for p in self.PATTERNS["CAMPUS_DIRECTIONS"])
         is_fac = any(re.search(p, q) for p in self.PATTERNS["FACULTY_LOOKUP"])
         is_proc = any(re.search(p, q) for p in self.PATTERNS["PROCEDURE_FORM"])
@@ -87,6 +87,8 @@ class IntentRouter:
         is_fee = any(re.search(p, q) for p in self.PATTERNS["FEE_QUERY"])
 
         # Preserve legacy aliases for existing tests
+        if is_att:
+            return "ACADEMIC_POLICY"
         if is_proc:
             return "PROCEDURE_FORM"
         if is_fac:

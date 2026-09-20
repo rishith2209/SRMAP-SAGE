@@ -33,27 +33,9 @@ class ConflictDetector:
                 explanation="Single or zero evidence items; no conflicting source exists."
             )
 
-        # 1. Check for Level 1 vs Lower Tier conflicts on the exact same scope
         level_1_items = [e for e in evidence_items if e.authority_level == 1]
-        lower_tier_items = [e for e in evidence_items if e.authority_level > 1]
 
-        # 2. Check Community Report overrides (Level 5 vs Level 1/2)
-        community_items = [e for e in evidence_items if e.authority_level == 5 or e.source_type == "community_report"]
-        official_items = [e for e in evidence_items if e.authority_level <= 2]
-        if community_items and official_items:
-            # Community claims can never override official sources
-            return ConflictAssessment(
-                conflict_type="AUTHORITY_CONFLICT",
-                has_conflict=True,
-                superseding_source_id=official_items[0].source_id,
-                explanation=(
-                    f"Official university source '{official_items[0].title}' (Authority Level {official_items[0].authority_level}) "
-                    f"takes precedence over unverified community report (Authority Level 5)."
-                ),
-                applicable_claims=["Level 1/2 official documentation prevails over community submission."]
-            )
-
-        # 3. Check for complementary domains (e.g. Placement Baseline vs Recruiter Specific)
+        # 1. Check for complementary domains (e.g. Placement Baseline vs Recruiter Specific)
         is_placement = any("placement" in (e.domain or "").lower() or "placement" in e.title.lower() for e in evidence_items)
         if is_placement:
             # Check if one is general policy and another is company-specific
@@ -69,13 +51,29 @@ class ConflictDetector:
                     )
                 )
 
-        # 4. Check for multi-channel event coverage (e.g. Event page + Social Announcement)
+        # 2. Check for multi-channel event coverage (e.g. Event page + Social Announcement)
         is_event = any(e.engine == "EVENT_ENGINE" or "event" in (e.domain or "").lower() for e in evidence_items)
         if is_event and len(evidence_items) >= 2:
             return ConflictAssessment(
                 conflict_type="NO_CONFLICT",
                 has_conflict=False,
                 explanation="Complementary multi-channel publications covering the same verified campus event."
+            )
+
+        # 3. Check Community & Informal / Social Media overrides (Level 3+ vs Level 1/2)
+        informal_items = [e for e in evidence_items if e.authority_level >= 3 or e.source_type in ["community_report", "social_media", "untrusted_crawl"]]
+        official_items = [e for e in evidence_items if e.authority_level <= 2]
+        if informal_items and official_items:
+            # Official sources take strict precedence over informal claims
+            return ConflictAssessment(
+                conflict_type="AUTHORITY_CONFLICT",
+                has_conflict=True,
+                superseding_source_id=official_items[0].source_id,
+                explanation=(
+                    f"Official university source '{official_items[0].title}' (Authority Level {official_items[0].authority_level}) "
+                    f"takes precedence over unverified informal/social media claim (Authority Level {informal_items[0].authority_level})."
+                ),
+                applicable_claims=["Official Level 1/2 documentation prevails over informal social media or community submissions."]
             )
 
         # 5. Check Temporal Relationships among Level 1 documents on the same topic

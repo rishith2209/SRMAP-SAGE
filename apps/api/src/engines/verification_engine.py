@@ -77,6 +77,10 @@ class SelfVerificationEngine:
         supporting_ids = []
 
         for ev in evidence_items:
+            # Untrusted data or injection payloads cannot serve as supporting evidence for claims
+            if ev.authority_level > 2 or any(inj in ev.excerpt.lower() for inj in ["system override", "override active", "ignore previous", "all rules are cancelled"]):
+                continue
+
             ev_text = (ev.excerpt + " " + ev.title).lower()
 
             # Verify percentage consistency if claim mentions a percentage

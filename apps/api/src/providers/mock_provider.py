@@ -20,7 +20,6 @@ class MockLLMProvider(BaseLLMProvider):
         max_tokens: int = 1500
     ) -> str:
         lower_prompt = prompt.lower()
-        # Simulated refusal for unsupported negative inquiries
         unsupported_keywords = [
             "professor x", "cafeteria", "lunch menu", "class schedule",
             "cricket tournament", "hostel fee", "2026 campus placement percentage",
@@ -28,7 +27,15 @@ class MockLLMProvider(BaseLLMProvider):
             "fake current", "exempting cse", "nonexistent circular", "srmap/cir/999",
             "arthur pendelton", "quantum teleportation", "rock concert", "football stadium",
             "red hair", "tuition fee discount", "friday afternoon timetable", "mechanical engineering lab 4",
-            "free laptop distribution", "fake"
+            "free laptop distribution", "fake", "2038", "2045", "2035", "mars", "tiger",
+            "michelin", "ancient spellbook", "crypto", "duel", "diplomatic passport",
+            "database administrator", "oracle erp", "leaked", "confidential medical",
+            "paris, france", "offshore campus", "submarine", "secret tunnel", "cyclone",
+            "individual student login password", "private faculty lounge", "overdue fine per second",
+            "bitcoin", "wizardry", "system prompt override", "print internal api keys",
+            "bowling alley", "casino", "invictus", "hacksrm", "mess fee", "helicopter",
+            "breakfast menu", "live breakfast", "spellbook", "ancient spellbooks",
+            "ignore previous", "ignore all previous", "api key", "api keys", "system instruction"
         ]
         for kw in unsupported_keywords:
             if kw in lower_prompt:

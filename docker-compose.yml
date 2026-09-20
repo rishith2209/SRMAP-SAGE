@@ -11,7 +11,7 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - srmap_sage_pgdata:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-srmap_sage} -d ${POSTGRES_DB:-srmap_sage_db}"]
       interval: 5s
@@ -20,7 +20,7 @@ services:
 
   api:
     build:
-      context: ../apps/api
+      context: ./apps/api
       dockerfile: Dockerfile
     container_name: srmap_sage_api
     restart: unless-stopped
@@ -43,7 +43,7 @@ services:
 
   web:
     build:
-      context: ../apps/web
+      context: ./apps/web
       dockerfile: Dockerfile
     container_name: srmap_sage_web
     restart: unless-stopped

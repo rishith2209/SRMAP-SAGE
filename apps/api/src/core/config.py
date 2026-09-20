@@ -44,5 +44,11 @@ class Settings(BaseSettings):
     GITHUB_REPO_NAME: str = ""
     GITHUB_FEEDBACK_TOKEN: str = ""
 
+    # Maintainer Admin Authorization (Phase 6)
+    ADMIN_API_KEY: str = Field(
+        default="srmap_sage_maintainer_key_2026",
+        description="Authorization key for maintainer admin APIs"
+    )
+
 
 settings = Settings()

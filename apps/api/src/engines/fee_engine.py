@@ -102,6 +102,8 @@ class FeeEngine:
             if re.search(r"\b" + alias + r"\b", prog_kw):
                 prog_kw += f" {expansion}"
 
+        best_match = None
+        best_score = 0
         for f in self._fees:
             if year and f.get("academic_year") != year:
                 continue
@@ -109,20 +111,36 @@ class FeeEngine:
                 continue
             if prog_kw:
                 f_prog = f.get("program", "").lower()
-                # Check if any significant word of prog_kw matches f_prog
-                prog_words = [w for w in re.findall(r"\w+", prog_kw) if len(w) > 2 and w not in ["fee", "the", "for", "what"]]
-                if prog_words and not any(w in f_prog for w in prog_words):
-                    continue
+                prog_words = [
+                    w for w in re.findall(r"\w+", prog_kw)
+                    if len(w) > 2 and w not in ["fee", "the", "for", "what", "btech", "tech", "engineering", "tuition", "program", "programs", "srmap", "university"]
+                ]
+                if not prog_words:
+                    prog_words = [
+                        w for w in re.findall(r"\w+", prog_kw)
+                        if len(w) > 2 and w not in ["fee", "the", "for", "what", "program", "programs"]
+                    ]
+                matches = sum(1 for w in prog_words if w in f_prog)
+                if matches > best_score:
+                    best_score = matches
+                    best_match = f
+            else:
+                best_match = f
+                break
 
-            return FeeCardPayload(
-                program=f["program"],
-                academic_year=f["academic_year"],
-                fee_type=f["fee_type"],
-                amount=float(f["amount"]),
-                currency=f.get("currency", "INR"),
-                applicable_from=f.get("applicable_from"),
-                status=f.get("status", "VERIFIED"),
-                source_id=f.get("source_id", "srmap_fee_registry")
-            )
+        if not best_match or (prog_kw and best_score == 0):
+            return None
+
+        f = best_match
+        return FeeCardPayload(
+            program=f["program"],
+            academic_year=f["academic_year"],
+            fee_type=f["fee_type"],
+            amount=float(f["amount"]),
+            currency=f.get("currency", "INR"),
+            applicable_from=f.get("applicable_from"),
+            status=f.get("status", "VERIFIED"),
+            source_id=f.get("source_id", "srmap_fee_registry")
+        )
 
         return None

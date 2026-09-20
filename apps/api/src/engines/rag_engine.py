@@ -99,7 +99,7 @@ class RAGEngine:
                     if tok in content:
                         content_score += 2
                     if tok in source_title:
-                        content_score += 6
+                        content_score += 8
                     if domain and tok in domain:
                         content_score += 4
 
@@ -146,7 +146,7 @@ class RAGEngine:
                 section_heading=ch.get("section_heading"),
                 freshness_status=freshness,
                 publication_date_str=pub_date,
-                snippet=ch.get("content", "")[:200]
+                snippet=ch.get("content", "")[:1200]
             )
             results.append((ch.get("content", ""), citation))
 

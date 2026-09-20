@@ -119,6 +119,10 @@ class FacultyEngine:
             if fac_substantive and fac_substantive.issubset(q_tokens):
                 matched = data
                 break
+            desig = data.get("designation", "").lower()
+            if (desig and (clean_q in desig or desig in clean_q)) or ("vice chancellor" in clean_q and "vice chancellor" in desig):
+                matched = data
+                break
             if q_tokens and q_tokens.issubset(fac_tokens):
                 matched = data
                 break

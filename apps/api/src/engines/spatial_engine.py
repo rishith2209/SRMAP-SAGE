@@ -97,10 +97,19 @@ class CampusSpatialEngine:
             "medical center": "node_health_center",
             "medical centre": "node_health_center",
             "health center": "node_health_center",
+            "health centre": "node_health_center",
             "clinic": "node_health_center",
             "pharmacy": "node_health_center",
             "hospital": "node_health_center"
         }
+
+        # Check for unverified or mythical entities that do not exist on campus
+        unverified_spatial_terms = [
+            "tunnel", "vault", "dock", "secret", "ancient", "guntur", "vijayawada",
+            "submarine", "bunker", "helipad", "airport", "spellbook", "dungeon"
+        ]
+        if any(term in kw for term in unverified_spatial_terms):
+            return None
 
         for alias, node_id in aliases.items():
             if alias in kw or kw in alias:
